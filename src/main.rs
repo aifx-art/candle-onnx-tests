@@ -3,7 +3,7 @@ extern crate accelerate_src;
 #[cfg(feature = "mkl")]
 extern crate intel_mkl_src;
 
-use candle_core::{DType, Device, IndexOp, Tensor};
+use candle_core::{utils::{cuda_is_available, metal_is_available}, DType, Device, IndexOp, Tensor};
 use clap::Parser;
 use image::{DynamicImage, GenericImageView};
 use std::path::PathBuf;
@@ -24,6 +24,9 @@ struct Args {
 
     #[arg(long, default_value = "output.png")]
     output: String,
+
+    #[arg(long)]
+    cpu: bool,
 }
 
 fn load_image_to_tensor(path: &str) -> anyhow::Result<Tensor> {
@@ -127,7 +130,7 @@ pub fn save_image<P: AsRef<std::path::Path>>(img: &Tensor, p: P) -> anyhow::Resu
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
-
+    let device = device(args.cpu)?;
     // Load and prepare image
     //let input_tensor = load_image_to_tensor(&args.image)?;
     let (input_tensor,h,w) = load_image(&args.image,None)?;
@@ -163,4 +166,27 @@ fn main() -> anyhow::Result<()> {
 
     println!("Upscaled image saved to {}", args.output);
     Ok(())
+}
+
+
+pub fn device(cpu: bool) -> anyhow::Result<Device> {
+    if cpu {
+        Ok(Device::Cpu)
+    } else if cuda_is_available() {
+        Ok(Device::new_cuda(0)?)
+    // } else if metal_is_available() {
+  //      Ok(Device::new_metal(0)?)
+    } else {
+        #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+        {
+            println!(
+                "Running on CPU, to run on GPU(metal), build this example with `--features metal`"
+            );
+        }
+        #[cfg(not(all(target_os = "macos", target_arch = "aarch64")))]
+        {
+            println!("Running on CPU, to run on GPU, build this example with `--features cuda`");
+        }
+        Ok(Device::Cpu)
+    }
 }
