@@ -8,7 +8,6 @@ use clap::Parser;
 use image::{DynamicImage, GenericImageView};
 use std::path::PathBuf;
 
-mod audio_io;
 
 use image::ImageReader;
 use std::io::Cursor;

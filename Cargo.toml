@@ -10,4 +10,3 @@ image = "0.25.6"
 clap = { version = "4", features = ["derive"] }
 anyhow = "1"
 rubato = "0.16.2"
-cpal = "0.15.3"
