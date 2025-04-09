@@ -135,7 +135,7 @@ pub fn save_image<P: AsRef<std::path::Path>>(img: &Tensor, p: P) -> anyhow::Resu
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
-    let device = device(args.cpu)?;
+    let device = Device::Cpu;//device(args.cpu)?;
     // Load and prepare image
     //let input_tensor = load_image_to_tensor(&args.image)?;
     let (input_tensor, h, w) = load_image(&args.image, &device, None)?;
@@ -144,8 +144,8 @@ fn main() -> anyhow::Result<()> {
     println!("Input shape: {:?}", input_tensor.shape());
 
     // let res = save_tensor_to_image(input_tensor.i(0)?, "output.png");
-    let res = save_image(&input_tensor.i(0)?, "output.png");
-    println!("output {:?}", res);
+    //let res = save_image(&input_tensor.i(0)?, "output.png");
+    //println!("output {:?}", res);
     // Load ONNX model
     let model_path = PathBuf::from(&args.model);
     //4xNomos8kSCHAT-L.onnx
