@@ -30,29 +30,6 @@ struct Args {
     cpu: bool,
 }
 
-fn load_image_to_tensor(path: &str, device: &Device) -> anyhow::Result<Tensor> {
-    let img = image::open(path)?;
-    let img = img.to_rgb8();
-    let (width, height) = img.dimensions();
-
-    let img_array: Vec<f32> = img
-        .pixels()
-        .flat_map(|pixel| pixel.0.iter().map(|c| *c as f32 / 255.0))
-        .collect();
-
-    let tensor = Tensor::from_vec(
-        img_array,
-        (height as usize, width as usize, 3),
-        device,
-    )?
-    .permute((2, 0, 1))? // To shape [3, H, W]
-    .unsqueeze(0)?// To shape [1, 3, H, W]
-   // .to_dtype(DType::F16)?; 
-   ;
-
-    println!("image loaded tensor {:?}", tensor);
-    Ok(tensor)
-}
 
 pub fn load_image<P: AsRef<std::path::Path>>(
     p: P,
@@ -111,27 +88,6 @@ fn save_tensor_to_image(tensor: Tensor, path: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Saves an image to disk using the image crate, this expects an input with shape
-/// (c, height, width).
-pub fn save_image<P: AsRef<std::path::Path>>(img: &Tensor, p: P) -> anyhow::Result<()> {
-    let p = p.as_ref();
-    let (channel, height, width) = img.dims3()?;
-    if channel != 3 {
-        return Err(anyhow!(
-            "save_image expects an input of shape (3, height, width)"
-        ));
-    }
-    let img = img.permute((1, 2, 0))?.flatten_all()?.to_dtype(DType::U8)?;
-    let pixels = img.to_vec1::<u8>()?;
-    let image: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
-        match image::ImageBuffer::from_raw(width as u32, height as u32, pixels) {
-            Some(image) => image,
-            None => return Err(anyhow!("error saving image {p:?}")),
-        };
-    image.save(p).map_err(candle_core::Error::wrap)?;
-
-    Ok(())
-}
 
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
@@ -195,3 +151,53 @@ pub fn device(cpu: bool) -> anyhow::Result<Device> {
         Ok(Device::Cpu)
     }
 }
+
+
+/* 
+fn load_image_to_tensor(path: &str, device: &Device) -> anyhow::Result<Tensor> {
+    let img = image::open(path)?;
+    let img = img.to_rgb8();
+    let (width, height) = img.dimensions();
+
+    let img_array: Vec<f32> = img
+        .pixels()
+        .flat_map(|pixel| pixel.0.iter().map(|c| *c as f32 / 255.0))
+        .collect();
+
+    let tensor = Tensor::from_vec(
+        img_array,
+        (height as usize, width as usize, 3),
+        device,
+    )?
+    .permute((2, 0, 1))? // To shape [3, H, W]
+    .unsqueeze(0)?// To shape [1, 3, H, W]
+   // .to_dtype(DType::F16)?; 
+   ;
+
+    println!("image loaded tensor {:?}", tensor);
+    Ok(tensor)
+} */
+
+/* 
+/// Saves an image to disk using the image crate, this expects an input with shape
+/// (c, height, width).
+fn save_image<P: AsRef<std::path::Path>>(img: &Tensor, p: P) -> anyhow::Result<()> {
+    let p = p.as_ref();
+    let (channel, height, width) = img.dims3()?;
+    if channel != 3 {
+        return Err(anyhow!(
+            "save_image expects an input of shape (3, height, width)"
+        ));
+    }
+    let img = img.permute((1, 2, 0))?.flatten_all()?.to_dtype(DType::U8)?;
+    let pixels = img.to_vec1::<u8>()?;
+    let image: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
+        match image::ImageBuffer::from_raw(width as u32, height as u32, pixels) {
+            Some(image) => image,
+            None => return Err(anyhow!("error saving image {p:?}")),
+        };
+    image.save(p).map_err(candle_core::Error::wrap)?;
+
+    Ok(())
+}
+ */

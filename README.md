@@ -1,5 +1,5 @@
   ```
-  cargo run -r -- --image face-512.png --output facex.png --model 4xNomosWebPhoto_esrgan_fp32_opset17.onnx
+  cargo run -r -- --image 32.png --output upres.png --model 4xNomosWebPhoto_esrgan_fp32_opset17.onnx
   ```
 
   
