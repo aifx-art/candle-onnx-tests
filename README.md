@@ -21,5 +21,10 @@ Error: unsupported op_type DepthToSpace for op NodeProto { input: ["/model/body.
 
 
 
+another error using
+https://github.com/Phhofm/models/releases/tag/4xFFHQDAT
 
+```
+Error: unsupported op_type LayerNormalization for op NodeProto { input: ["/Reshape_1_output_0", "/Constant_16_output_0", "/Constant_17_output_0"], output: ["/LayerNormalization_output_0"], name: "/LayerNormalization", op_type: "LayerNormalization", domain: "", attribute: [AttributeProto { name: "axis", ref_attr_name: "", doc_string: "", r#type: Int, f: 0.0, i: -1, s: [], t: None, g: None, sparse_tensor: None, tp: None, floats: [], ints: [], strings: [], tensors: [], graphs: [], sparse_tensors: [], type_protos: [] }, AttributeProto { name: "epsilon", ref_attr_name: "", doc_string: "", r#type: Float, f: 1e-5, i: 0, s: [], t: None, g: None, sparse_tensor: None, tp: None, floats: [], ints: [], strings: [], tensors: [], graphs: [], sparse_tensors: [], type_protos: [] }], doc_string: "" }
+```
 
