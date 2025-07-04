@@ -30,7 +30,6 @@ struct Args {
     cpu: bool,
 }
 
-
 pub fn load_image<P: AsRef<std::path::Path>>(
     p: P,
     device: &Device,
@@ -66,7 +65,10 @@ pub fn load_image<P: AsRef<std::path::Path>>(
 }
 
 fn save_tensor_to_image(tensor: Tensor, path: &str) -> anyhow::Result<()> {
-    let tensor = tensor.squeeze(0)?.permute((1, 2, 0))?.to_device(&Device::Cpu)?; // shape [H, W, 3]
+    let tensor = tensor
+        .squeeze(0)?
+        .permute((1, 2, 0))?
+        .to_device(&Device::Cpu)?; // shape [H, W, 3]
     let shape = tensor.shape();
     println!("new shape of output image {:?}", shape);
     let (height, width, channels) = (shape.dims()[0], shape.dims()[1], shape.dims()[2]);
@@ -88,10 +90,9 @@ fn save_tensor_to_image(tensor: Tensor, path: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
-    let device = Device::Cpu;//device(args.cpu)?;
+    let device = Device::Cpu; //device(args.cpu)?;
     // Load and prepare image
     //let input_tensor = load_image_to_tensor(&args.image)?;
     let (input_tensor, h, w) = load_image(&args.image, &device, None)?;
@@ -107,15 +108,37 @@ fn main() -> anyhow::Result<()> {
     //4xNomos8kSCHAT-L.onnx
     //4xNomosWebPhoto_esrgan_fp32_opset17.onnx
     let model = candle_onnx::read_file(model_path)?;
+   
     let graph = model.graph.as_ref().unwrap();
     println!("graph {:?}", graph.name);
     println!("graph.input[0] {:?}", graph.input[0]);
-
+ for input in &graph.input {
+    println!("Input name: {}", input.name);
+    /* if let Some(t) = &input.r#type {
+        if let Some(tensor_type) = &t.value {
+            if let candle_onnx::onnx::type_proto::Value::TensorType(tensor) = tensor_type {
+                if let Some(shape) = &tensor.shape {
+                    let dims: Vec<_> = shape
+                        .dim
+                        .iter()
+                        .map(|d| match &d.value {
+                            Some(candle_onnx::onnx::tensor_shape_proto::dimension::Value::DimValue(v)) => v.to_string(),
+                            Some(candle_onnx::onnx::tensor_shape_proto::dimension::Value::DimParam(p)) => p.clone(),
+                            _ => "?".to_string(),
+                        })
+                        .collect();
+                    println!("  shape: {:?}", dims);
+                }
+                println!("  elem_type: {:?}", tensor.elem_type);
+            }
+        }
+    } */
+}
     // Prepare input map
     let mut inputs = std::collections::HashMap::new();
     inputs.insert(graph.input[0].name.to_string(), input_tensor);
 
-    println!("inputs {:?}", inputs);
+    println!("\ntensor with inputs {:?}\n", inputs);
     // Run the model
     let mut outputs = candle_onnx::simple_eval(&model, inputs)?;
 
@@ -152,8 +175,7 @@ pub fn device(cpu: bool) -> anyhow::Result<Device> {
     }
 }
 
-
-/* 
+/*
 fn load_image_to_tensor(path: &str, device: &Device) -> anyhow::Result<Tensor> {
     let img = image::open(path)?;
     let img = img.to_rgb8();
@@ -171,14 +193,14 @@ fn load_image_to_tensor(path: &str, device: &Device) -> anyhow::Result<Tensor> {
     )?
     .permute((2, 0, 1))? // To shape [3, H, W]
     .unsqueeze(0)?// To shape [1, 3, H, W]
-   // .to_dtype(DType::F16)?; 
+   // .to_dtype(DType::F16)?;
    ;
 
     println!("image loaded tensor {:?}", tensor);
     Ok(tensor)
 } */
 
-/* 
+/*
 /// Saves an image to disk using the image crate, this expects an input with shape
 /// (c, height, width).
 fn save_image<P: AsRef<std::path::Path>>(img: &Tensor, p: P) -> anyhow::Result<()> {
