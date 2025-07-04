@@ -69,10 +69,7 @@ fn save_tensor_to_image(tensor: Tensor, path: &str) -> anyhow::Result<()> {
         .squeeze(0)?
         .permute((1, 2, 0))?
         .to_device(&Device::Cpu)?; // shape [H, W, 3]
-<<<<<<< HEAD
-=======
 
->>>>>>> 75522576ab163139cca625167f14546ef1844631
     let shape = tensor.shape();
     println!("#### OUTPUT tensor {}", tensor);
     println!("new shape of output image {:?}", shape);
@@ -110,8 +107,6 @@ fn save_tensor_to_image(tensor: Tensor, path: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-<<<<<<< HEAD
-=======
 /// Saves an image to disk using the image crate, this expects an input with shape
 /// (c, height, width).
 fn save_image<P: AsRef<std::path::Path>>(img: &Tensor, p: P) -> anyhow::Result<()> {
@@ -134,7 +129,6 @@ fn save_image<P: AsRef<std::path::Path>>(img: &Tensor, p: P) -> anyhow::Result<(
     Ok(())
 }
 
->>>>>>> 75522576ab163139cca625167f14546ef1844631
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     let device = Device::Cpu; //device(args.cpu)?;
