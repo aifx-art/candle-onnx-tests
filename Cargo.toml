@@ -4,25 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-<<<<<<< HEAD
 candle-onnx = { version = "0.9.1" }
-=======
-candle-onnx = { git = "https://github.com/huggingface/candle" }
->>>>>>> 75522576ab163139cca625167f14546ef1844631
 image = "0.25.6"
 clap = { version = "4.5.38", features = ["derive"] }
 anyhow = "1.0.98"
 rubato = "0.16.2"
 
 [target.'cfg(target_os = "linux")'.dependencies]
-<<<<<<< HEAD
 candle-core = { version = "0.9.1", features = ["cuda"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 candle-core = { version = "0.9.1", features = [] }
-=======
-candle-core = { git = "https://github.com/huggingface/candle", features = ["cuda"] }
-
-[target.'cfg(target_os = "macos")'.dependencies]
-candle-core = { git = "https://github.com/huggingface/candle", features = ["metal"] }
->>>>>>> 75522576ab163139cca625167f14546ef1844631
