@@ -69,35 +69,83 @@ fn save_tensor_to_image(tensor: Tensor, path: &str) -> anyhow::Result<()> {
         .squeeze(0)?
         .permute((1, 2, 0))?
         .to_device(&Device::Cpu)?; // shape [H, W, 3]
+<<<<<<< HEAD
+=======
+
+>>>>>>> 75522576ab163139cca625167f14546ef1844631
     let shape = tensor.shape();
+    println!("#### OUTPUT tensor {}", tensor);
     println!("new shape of output image {:?}", shape);
     let (height, width, channels) = (shape.dims()[0], shape.dims()[1], shape.dims()[2]);
+    println!("h {}, w {}, c {}", height, width, channels);
 
-    let data = tensor.to_vec1::<f32>()?;
+    let data = tensor.to_vec3::<f32>()?;
+    // println!("data {:?}", data);
+
     let mut imgbuf = image::RgbImage::new(width as u32, height as u32);
-    for y in 0..height {
+    // for y in 0..height {
+    //     for x in 0..width {
+    //         let idx = (y * width + x) * channels;
+    //         let pixel = image::Rgb([
+    //             (data[idx] * 255.0).clamp(0.0, 255.0) as u8,
+    //             (data[idx + 1] * 255.0).clamp(0.0, 255.0) as u8,
+    //             (data[idx + 2] * 255.0).clamp(0.0, 255.0) as u8,
+    //         ]);
+    //         imgbuf.put_pixel(x as u32, y as u32, pixel);
+    //     }
+    // }
+
+        for y in 0..height {
         for x in 0..width {
-            let idx = (y * width + x) * channels;
             let pixel = image::Rgb([
-                (data[idx] * 255.0).clamp(0.0, 255.0) as u8,
-                (data[idx + 1] * 255.0).clamp(0.0, 255.0) as u8,
-                (data[idx + 2] * 255.0).clamp(0.0, 255.0) as u8,
+                (data[y][x][0] ).clamp(0.0, 255.0) as u8,
+                (data[y][x][1] ).clamp(0.0, 255.0) as u8,
+                (data[y][x][2] ).clamp(0.0, 255.0) as u8,
             ]);
             imgbuf.put_pixel(x as u32, y as u32, pixel);
         }
     }
+
     imgbuf.save(path)?;
     Ok(())
 }
 
+<<<<<<< HEAD
+=======
+/// Saves an image to disk using the image crate, this expects an input with shape
+/// (c, height, width).
+fn save_image<P: AsRef<std::path::Path>>(img: &Tensor, p: P) -> anyhow::Result<()> {
+    let p = p.as_ref();
+    let (channel, height, width) = img.dims3()?;
+    if channel != 3 {
+        return Err(anyhow!(
+            "save_image expects an input of shape (3, height, width)"
+        ));
+    }
+    let img = img.permute((1, 2, 0))?.flatten_all()?.to_dtype(DType::U8)?;
+    let pixels = img.to_vec1::<u8>()?;
+    let image: image::ImageBuffer<image::Rgb<u8>, Vec<u8>> =
+        match image::ImageBuffer::from_raw(width as u32, height as u32, pixels) {
+            Some(image) => image,
+            None => return Err(anyhow!("error saving image {p:?}")),
+        };
+    image.save(p).map_err(candle_core::Error::wrap)?;
+
+    Ok(())
+}
+
+>>>>>>> 75522576ab163139cca625167f14546ef1844631
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
     let device = Device::Cpu; //device(args.cpu)?;
     // Load and prepare image
     //let input_tensor = load_image_to_tensor(&args.image)?;
     let (input_tensor, h, w) = load_image(&args.image, &device, None)?;
-    let input_tensor = input_tensor.to_device(&device)?;
+    let d_type = DType::F32;
+    let input_tensor = input_tensor.to_dtype(d_type)?.to_device(&device)?;
     //let input_tensor =load_image_with_std_mean(p, res, mean, std)
+    //println!("Input : {}", input_tensor);
+
     println!("Input shape: {:?}", input_tensor.shape());
 
     // let res = save_tensor_to_image(input_tensor.i(0)?, "output.png");
